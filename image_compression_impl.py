@@ -2,13 +2,38 @@ import numpy as np
 from sklearn.cluster import KMeans
 from PIL import Image
 
+
 # Function to load and preprocess the image
 def load_image(image_path):
-    raise NotImplementedError('You need to implement this function')
-
-# Function to perform KMeans clustering for image quantization
+    # Load the image using PIL
+    img = Image.open(image_path)
+    
+    # Convert image to RGB (ignores transparency if present)
+    img = img.convert('RGB')
+    
+    # Convert image to a numpy array
+    img_np = np.array(img)
+    
+    return img_np
 def image_compression(image_np, n_colors):
-    raise NotImplementedError('You need to implement this function')
+    # Get the shape of the image
+    h, w, c = image_np.shape
+    
+    # Reshape the image to be a list of pixels (each pixel is an array of 3 values)
+    image_reshaped = image_np.reshape(-1, 3)
+    
+    # Perform KMeans clustering
+    kmeans = KMeans(n_clusters=n_colors, random_state=42)
+    kmeans.fit(image_reshaped)
+    
+    # Replace each pixel value with the nearest cluster center
+    compressed_image = kmeans.cluster_centers_[kmeans.labels_]
+    
+    # Reshape the compressed image to original dimensions
+    compressed_image = compressed_image.reshape(h, w, c).astype(np.uint8)
+    
+    return compressed_image
+
 
 # Function to concatenate and save the original and quantized images side by side
 def save_result(original_image_np, quantized_image_np, output_path):
